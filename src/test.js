@@ -1,14 +1,5 @@
-Virtual
-=======
+const Virtual = require('../');
 
-Userland, runtime-checked virtual classes for ES6.
-
-Pass in `NODE_ENV=development` to get runtime checks. Pass in `NODE_ENV=production` to disable them.
-
-### Example
-
-```js
-// create a new class with 2 virtual methods
 const AbstractClass = Virtual('virtualMethodFoo', 'virtualMethodBar');
 
 class NotTotallyAbstractClass extends AbstractClass {
@@ -32,7 +23,6 @@ class ActuallyConcreteClass extends NotTotallyAbstractClass {
 }
 let didThrow = false;
 try {
-  // 2 missing implems
   new AbstractClass();
 }
 catch(err) {
@@ -42,7 +32,6 @@ didThrow.should.be.true;
 
 didThrow = false;
 try {
-  // 1 missing implem
   new NotTotallyAbstractClass();
 }
 catch(err) {
@@ -58,4 +47,3 @@ catch(err) {
   didThrow = true;
 }
 didThrow.should.be.false;
-```
