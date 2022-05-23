@@ -1,5 +1,2 @@
 node_modules
-tmp
-*.pid
-*.lock
-npm-debug.log
+/nbproject/private/

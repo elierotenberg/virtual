@@ -1,61 +1,7 @@
-Virtual
+# Virtual
 =======
+## Note for updated versione >0.3.0
+This is a new version of virtual module, that use Proxy for check if the virtual method is replaced.
+The problem with the previous version is that you only have an error if you try to use a virtual method that isn't defined in extended class.
+Currently I develop under Nodejs, and I hope that the author or others will partecipate for javascript functionality.
 
-Userland, runtime-checked virtual classes for ES6.
-
-Pass in `NODE_ENV=development` to get runtime checks. Pass in `NODE_ENV=production` to disable them.
-
-### Example
-
-```js
-// create a new class with 2 virtual methods
-const AbstractClass = Virtual('virtualMethodFoo', 'virtualMethodBar');
-
-class NotTotallyAbstractClass extends AbstractClass {
-  constructor() {
-    super();
-  }
-
-  virtualMethodFoo() {
-    console.log('foo!');
-  }
-}
-
-class ActuallyConcreteClass extends NotTotallyAbstractClass {
-  constructor() {
-    super();
-  }
-
-  virtualMethodBar() {
-    console.log('bar!');
-  }
-}
-let didThrow = false;
-try {
-  // 2 missing implems
-  new AbstractClass();
-}
-catch(err) {
-  didThrow = true;
-}
-didThrow.should.be.true;
-
-didThrow = false;
-try {
-  // 1 missing implem
-  new NotTotallyAbstractClass();
-}
-catch(err) {
-  didThrow = true;
-}
-didThrow.should.be.true;
-
-didThrow = false;
-try {
-  new ActuallyConcreteClass();
-}
-catch(err) {
-  didThrow = true;
-}
-didThrow.should.be.false;
-```
