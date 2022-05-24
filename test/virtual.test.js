@@ -1,6 +1,6 @@
 /* global Promise, describe, it, __dirname, process*/
 const ENVIRONMENT = process.env.NODE_ENV;
-const {changeEnv} = require('change-env');
+const ChangeEnv = require('change-env')(require);
 const util = require('util');
 
 const {expect, assert} = require('chai');
@@ -24,7 +24,6 @@ describe('Virtual features and errors', () => {
   });
   it('virtual already defined throws error', () => {
     class user_class{static staticMethodAlreadyDefined(){}; methodAlreadyDefined(){}};
-      console.dir('staticMethodAlreadyDefined' in user_class);
     const list_virtual_method = ['methodAlreadyDefined', {name: 'staticMethodAlreadyDefined', static: true}];
     expect(()=>{virtual(t.enabling_flag)(user_class, ...list_virtual_method);}).to.throws('virtual method is already present in class');
   });
@@ -42,11 +41,48 @@ describe('Virtual features and errors', () => {
 
   
 });
-describe('Virtual disabled', () => {
-  it.skip('flag false disables Virtual', () => {
-    
+describe('Enabling', () => {
+  class user_class{static staticMethodAlreadyDefined(){}; methodAlreadyDefined(){}};
+  const list_of_virtual_methods = ['methodAlreadyDefined', {name: 'staticMethodAlreadyDefined', static: true},
+                                    'otherVirtualethodNotDefined', {name: 'otherStaticVirtualMethodNotDefined', static: true}];
+  describe('Virtual disabled', () => {
+    it('flag false disables Virtual', () => {
+      testVirtualDisabled(virtual(false),user_class, list_of_virtual_methods);
+    });
+    it('flag string that doesnt match with environment disables Virtual', () => {
+      const ENVIRONMENT = 'this doesnt match';
+      testVirtualDisabled(virtual(ENVIRONMENT),user_class, list_of_virtual_methods);
+    });
   });
-  it.skip('flag string that doesnt match with environment disables Virtual', () => {
-    
+  describe('Virtual enabled', () => {
+    it('flag true enables Virtual', () => {
+      testVirtualEnabled(virtual(true),user_class, list_of_virtual_methods);
+    });
+    it('flag string that matchs with environment enables Virtual', () => {
+      const ENVIRONMENT = 'this matches';
+      ChangeEnv(ENVIRONMENT, ()=>{
+        testVirtualEnabled(virtual(ENVIRONMENT),user_class, list_of_virtual_methods);
+      });
+    });
   });
+});
+
+function testVirtualDisabled(virtual, user_class, list_of_virtual_methods){
+  const class_with_virtual = virtual(user_class, ...list_of_virtual_methods);
+  expect(()=>{callMethodForActivateCheck(class_with_virtual);}).to.not.throw();
+  expect(()=>{callConstructorForActivateCheck(class_with_virtual)}).to.not.throw();
+}
+function testVirtualEnabled(virtual, user_class, list_of_virtual_methods){
+  let class_with_virtual;
+  expect(()=>{class_with_virtual = virtual(user_class, ...list_of_virtual_methods);}).to.throw('virtual method is already present in class');
+}
+
+function callMethodForActivateCheck(user_class){
+  user_class.anyMethodorProperty;
+}
+function callConstructorForActivateCheck(user_class){
+  new user_class();
+}
+describe('Virtual usage', () => {
+  
 });
