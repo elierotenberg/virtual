@@ -90,18 +90,29 @@ function callConstructorForActivateCheck(user_class){
   new user_class();
 }
 describe('Virtual usage', () => {
-  it.skip('new Abstract class throws error also if constructor implements the definition of virtual methods', () => {
-    //// new features / probably fix. As implemented, constructor(){this.virtualMethod = ...} avoids the check.
-    //// eg of fix: in construct of Proxy,
-    ////let proto = Object.assign({}, target.prototype); proto.constructor = function(){void}; let value = Reflect.construct(proto, undefined, receiver)
-    //// and check 'virtualMethod' in value;
-  });
-  it.skip('derived class that doesnt implements any virtual methods (non static), throws error', () => {
-    const user_class =  class{};
+  it('derived class that doesnt implements any virtual methods (NON static), throws error', () => {
+    const user_class =  class{constructor(arg){this.constructor_classe_base = arg;}};
     const class_with_virtual = virtual(t.enabling_flag)(user_class, 'notDefinedVirtualMethod');
     makeSureThatBaseClassThrowsError(class_with_virtual, 'virtual method is not implemented');
+    const derived_user_class = class extends class_with_virtual{
+      constructor(arg){super(arg); this.prova_che_constructor_chiamato = arg;}
+    };
+    expect(()=>{new derived_user_class('value');}).to.throw('virtual method is not implemented');
   });
-  it.skip('derived class that implements each virtual methods, doesnt throw error', () => {
+  it('derived class that implements each virtual methods (NON static), doesnt throw error', () => {
+    const user_class =  class{constructor(arg){this.constructor_classe_base = arg;}};
+    const class_with_virtual = virtual(t.enabling_flag)(user_class, 'notDefinedVirtualMethod');
+    makeSureThatBaseClassThrowsError(class_with_virtual, 'virtual method is not implemented');
+    const derived_user_class = class extends class_with_virtual{
+      constructor(arg){super(arg); this.prova_che_constructor_chiamato = arg;}
+      notDefinedVirtualMethod(){/* body */}
+    };
+    expect(()=>{new derived_user_class('value');}).to.not.throw();
+  });
+  it.skip('derived class that doesnt implements any virtual methods (STATIC), throws error', () => {
+    
+  });
+  it.skip('derived class that implements each virtual methods (STATIC), doesnt throw error', () => {
     
   });
   it.skip('derived of class with virtual derived from base class with or without virtual', () => {

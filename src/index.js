@@ -80,8 +80,12 @@ function checkIfExtendedClassImplementedVirtualMethod(list_virtual_method){
   };
 }
 function checkIfInstanceOfExtendedClassImplementedVirtualMethod(list_virtual_method){
+    console.log('dddddddd');
   return function(value){
+    console.dir(arguments);
     for(let virtual_method of list_virtual_method){
+      console.dir(typeof value[virtual_method] === 'function');
+      console.dir(value);
       assert(typeof value[virtual_method] === 'function', errors.not_implemented());
     }
   };
