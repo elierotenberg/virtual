@@ -1,0 +1,13 @@
+{
+    "spec": ["test/"],
+    "exit": true,
+    "ui": "bdd",
+    "exclude": [],
+    "watch": false,
+    "watch-files": [],
+    "diff": true,
+    "colors": true,
+    "reporter": "spec",
+    "inline-diffs": true,
+    "recursive": true
+  }
