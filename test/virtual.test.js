@@ -9,7 +9,7 @@ const {virtual} = require(`../`);
 
 const t = {args_correct_for_virtual: [class example{}, 'name_virtual_method'],
           args_for_disable_testing: [class example{}, 'name_virtual_method'],
-          enablig_flag: true};
+          enabling_flag: true};
 Object.freeze(t);
 
 
@@ -19,13 +19,14 @@ describe('Virtual features and errors', () => {
   });
   it('virtual with wrong disabling flag throws error', () => {
     for(let wrong_flag of [undefined, [], [1,2,3], 0, 5, -8, {}]){
-      expect(()=>{virtual(wrong_flag);}).to.throw('Virtual method is not implemented');
+      expect(()=>{virtual(wrong_flag);}).to.throw('The flag for disabling Virtual is wrong');
     }
   });
   it('virtual already defined throws error', () => {
-    const user_class = class {staticMethodAlreadyDefined(){}; methodAlreadyDefined(){}};
+    class user_class{static staticMethodAlreadyDefined(){}; methodAlreadyDefined(){}};
+      console.dir('staticMethodAlreadyDefined' in user_class);
     const list_virtual_method = ['methodAlreadyDefined', {name: 'staticMethodAlreadyDefined', static: true}];
-    expect(()=>{virtual(t.enablig_flag)(user_class, ...list_virtual_method);}).to.throws('virtual method is already present in class')
+    expect(()=>{virtual(t.enabling_flag)(user_class, ...list_virtual_method);}).to.throws('virtual method is already present in class');
   });
   const wrong_args = {notClass: [{}, 'name_virtual_method'],
                       method_not_string: [function(){}, 'name', 5, 'previous_isnt_string'],

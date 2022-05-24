@@ -1,12 +1,12 @@
 /* global process */
 
-const assert = require('assert');
+const assert = require('assert').strict;
 const {ProxyTracker} = require('proxy-tracker');
 
 const errors = {};
 errors.not_implemented = (name) =>{ return "".concat(name===undefined?"":name, ' ','virtual method is not implemented');};
 errors.method_already_present = (name) =>{ return "".concat(name===undefined?"":name, ' ','virtual method is already present in class');};
-
+errors.flag_wrong = "The flag for disabling Virtual is wrong";
 
 function Virtual(user_class, ...list_virtual_method){
   checkVirtualArgs(user_class, list_virtual_method);
@@ -16,9 +16,9 @@ function Virtual(user_class, ...list_virtual_method){
 }
 function checkVirtualArgs(user_class, list_virtual_method){
   assert(typeof user_class === 'function', 'incorrect virtual method or user_class');
-  assert(()=>{list_virtual_method === undefined ||
-                eachVirtualMethodIsStringOrObjectWithPropertyStatic(list_virtual_method);},
-                'incorrect virtual method or user_class').doesNotThrow();
+  assert( list_virtual_method === undefined ||
+            eachVirtualMethodIsStringOrObjectWithPropertyStatic(list_virtual_method),
+          'incorrect virtual method or user_class');
 }
 function eachVirtualMethodIsStringOrObjectWithPropertyStatic(list_virtual_method){
   return list_virtual_method.every(met => {
@@ -28,21 +28,25 @@ function eachVirtualMethodIsStringOrObjectWithPropertyStatic(list_virtual_method
 }
 
 function checkIfVirtualStaticMethodsAreAlreadyPresentInClass(user_class, list_virtual_method){
-  const list_static_virtual_methods =  list_virtual_method.filter(elem => {return isStaticMethod(elem);});
+  const list_static_virtual_methods =  returnArrayOfMethods(list_virtual_method.filter(elem => {return isStaticMethod(elem);}));
+ 
   for(let name_method of list_static_virtual_methods){
     assert(!(name_method in user_class), errors.method_already_present(name_method));
   }
 }
 
 function classWithCheckVirtualMethod(user_class, list_virtual_method){
-  const static_virtual_methods =  list_virtual_method.filter(elem => {return isStaticMethod(elem);});
-  const virtual_methods_of_instance = list_virtual_method.filter(elem => {return !isStaticMethod(elem);});
+  const static_virtual_methods =  returnArrayOfMethods(list_virtual_method.filter(elem => {return isStaticMethod(elem);}));
+  const virtual_methods_of_instance = returnArrayOfMethods(list_virtual_method.filter(elem => {return !isStaticMethod(elem);}));
   const handler_class = handlerForCheckingInClass(static_virtual_methods);
   const handler_instance = handlerForCheckingInInstance(virtual_methods_of_instance);
   return new ProxyTracker(user_class, handler_class, handler_instance);
 }
 function isStaticMethod(method){
   return typeof method === 'object' && method.static === true;
+}
+function returnArrayOfMethods(array){
+  return array.map(el => {if(typeof el === 'string') return el; else if(typeof el === 'object') return el.name; else throw 'error';});
 }
 function handlerForCheckingInClass(list_method){
   return {get: [checkIfExtendedClassImplementedVirtualMethod(list_method)]};
@@ -73,7 +77,7 @@ module.exports.virtual = disablingVirtual;
 
 function disablingVirtual(arg){
   let environment = process.env.NODE_ENV;
-  assert(typeof arg === 'boolean' || typeof arg === 'string');
+  assert(typeof arg === 'boolean' || typeof arg === 'string', errors.flag_wrong);
   
   if(arg === true || arg === environment) return Virtual;
   else return VirtualDisabled;

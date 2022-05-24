@@ -22,6 +22,8 @@
   "homepage": "https://github.com/elierotenberg/virtual",
   "devDependencies": {
     "chai": "^4.3.6",
-    "mocha": "^10.0.0"
+    "change-env": "^0.2.2",
+    "mocha": "^10.0.0",
+    "proxy-tracker": "^0.3.1"
   }
 }
