@@ -11,6 +11,7 @@ errors.flag_wrong = "The flag for disabling Virtual is wrong";
 function Virtual(user_class, ...list_virtual_method){
   checkVirtualArgs(user_class, list_virtual_method);
   checkIfVirtualStaticMethodsAreAlreadyPresentInClass(user_class, list_virtual_method);
+  checkIfVirtualMethodsAreAlreadyPresentInClass(user_class, list_virtual_method);
   
   return classWithCheckVirtualMethod(user_class, list_virtual_method);
 }
@@ -34,6 +35,20 @@ function checkIfVirtualStaticMethodsAreAlreadyPresentInClass(user_class, list_vi
     assert(!(name_method in user_class), errors.method_already_present(name_method));
   }
 }
+function checkIfVirtualMethodsAreAlreadyPresentInClass(user_class, list_virtual_method){
+  const list_virtual_methods =  returnArrayOfMethods(list_virtual_method.filter(elem => {return !isStaticMethod(elem);}));
+  const user_class_with_constructor_modified = createClassWithConstructorDoesNothing(user_class);
+  const instance_for_verify_methods = new user_class_with_constructor_modified();
+  for(let name_method of list_virtual_methods){
+    assert(!(name_method in instance_for_verify_methods), errors.method_already_present(name_method));
+  }
+}
+
+function createClassWithConstructorDoesNothing(user_class){
+  const new_class_without_original_constructor = function(){/* it's a constructor that does nothing*/};
+  new_class_without_original_constructor.prototype = user_class.prototype;
+  return new_class_without_original_constructor;
+}
 
 function classWithCheckVirtualMethod(user_class, list_virtual_method){
   const static_virtual_methods =  returnArrayOfMethods(list_virtual_method.filter(elem => {return isStaticMethod(elem);}));
@@ -49,10 +64,12 @@ function returnArrayOfMethods(array){
   return array.map(el => {if(typeof el === 'string') return el; else if(typeof el === 'object') return el.name; else throw 'error';});
 }
 function handlerForCheckingInClass(list_method){
-  return {get: [checkIfExtendedClassImplementedVirtualMethod(list_method)]};
+  const handler = {get: checkIfExtendedClassImplementedVirtualMethod(list_method)};
+  return handler;
 }
 function handlerForCheckingInInstance(list_method){
-  return {construct: checkIfInstanceOfExtendedClassImplementedVirtualMethod(list_method)};
+  const handler = {construct: checkIfInstanceOfExtendedClassImplementedVirtualMethod(list_method)};
+  return handler;
 }
 
 function checkIfExtendedClassImplementedVirtualMethod(list_virtual_method){
@@ -84,21 +101,4 @@ function disablingVirtual(arg){
 }
 function VirtualDisabled(user_class){
   return user_class;
-}
-
-
-
-//// da eliminare se test passano
-function insertMethodThatThrowsError(list_virtual_method){
-  return function(value, target){
-    for(let virtual_method of list_virtual_method){
-      if(!(virtual_method in target)){
-        target[virtual_method] = functionThrowNotImplementedError;
-        assert.fail(errors.not_implemented());
-      }
-    }
-  };
-}
-function functionThrowNotImplementedError(){
-  throw new TypeError(errors.not_implemented());
 }

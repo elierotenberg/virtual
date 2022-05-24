@@ -27,6 +27,12 @@ describe('Virtual features and errors', () => {
     const list_virtual_method = ['methodAlreadyDefined', {name: 'staticMethodAlreadyDefined', static: true}];
     expect(()=>{virtual(t.enabling_flag)(user_class, ...list_virtual_method);}).to.throws('virtual method is already present in class');
   });
+  it('virtual non static already defined throws error', () => {
+    class user_class{methodAlreadyDefined(){}};
+    const list_virtual_method = ['methodAlreadyDefined'];
+    let class_with_virtual;
+    expect(()=>{class_with_virtual = virtual(t.enabling_flag)(user_class, ...list_virtual_method);}).to.throw('virtual method is already present in class');
+  });
   const wrong_args = {notClass: [{}, 'name_virtual_method'],
                       method_not_string: [function(){}, 'name', 5, 'previous_isnt_string'],
                       method_without_static: [function(){}, 'name', {name: 'name_method'}, 'previous_hasnt_static_property'],
@@ -70,7 +76,7 @@ describe('Enabling', () => {
 function testVirtualDisabled(virtual, user_class, list_of_virtual_methods){
   const class_with_virtual = virtual(user_class, ...list_of_virtual_methods);
   expect(()=>{callMethodForActivateCheck(class_with_virtual);}).to.not.throw();
-  expect(()=>{callConstructorForActivateCheck(class_with_virtual)}).to.not.throw();
+  expect(()=>{callConstructorForActivateCheck(class_with_virtual);}).to.not.throw();
 }
 function testVirtualEnabled(virtual, user_class, list_of_virtual_methods){
   let class_with_virtual;
@@ -84,5 +90,26 @@ function callConstructorForActivateCheck(user_class){
   new user_class();
 }
 describe('Virtual usage', () => {
-  
+  it.skip('new Abstract class throws error also if constructor implements the definition of virtual methods', () => {
+    //// new features / probably fix. As implemented, constructor(){this.virtualMethod = ...} avoids the check.
+    //// eg of fix: in construct of Proxy,
+    ////let proto = Object.assign({}, target.prototype); proto.constructor = function(){void}; let value = Reflect.construct(proto, undefined, receiver)
+    //// and check 'virtualMethod' in value;
+  });
+  it.skip('derived class that doesnt implements any virtual methods (non static), throws error', () => {
+    const user_class =  class{};
+    const class_with_virtual = virtual(t.enabling_flag)(user_class, 'notDefinedVirtualMethod');
+    makeSureThatBaseClassThrowsError(class_with_virtual, 'virtual method is not implemented');
+  });
+  it.skip('derived class that implements each virtual methods, doesnt throw error', () => {
+    
+  });
+  it.skip('derived of class with virtual derived from base class with or without virtual', () => {
+    
+  });
 });
+
+function makeSureThatBaseClassThrowsError(user_class, error){
+  expect(()=>{callConstructorForActivateCheck(user_class);}).to.throw(error);
+  
+}
