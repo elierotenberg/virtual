@@ -73,7 +73,7 @@ function handlerForCheckingInInstance(list_method){
 }
 
 function checkIfExtendedClassImplementedVirtualMethod(list_virtual_method){
-  return function(value, target, prop){
+  return function(value, target, prop, receiver){
     if(isExtendsTrapped(prop)) return;
     for(let virtual_method of list_virtual_method){
       assert(typeof target[virtual_method] === 'function', errors.not_implemented());
@@ -87,8 +87,6 @@ function isExtendsTrapped(prop){
 function checkIfInstanceOfExtendedClassImplementedVirtualMethod(list_virtual_method){
   return function(value){
     for(let virtual_method of list_virtual_method){
-      console.dir(typeof value[virtual_method] === 'function');
-      console.dir(value);
       assert(typeof value[virtual_method] === 'function', errors.not_implemented());
     }
   };
