@@ -97,7 +97,7 @@ describe('Virtual usage', () => {
     const derived_user_class = class extends class_with_virtual{
       constructor(arg){super(arg); this.prova_che_constructor_chiamato = arg;}
     };
-    expect(()=>{new derived_user_class('value');}).to.throw('virtual method is not implemented');
+    expect(()=>{callConstructorForActivateCheck(derived_user_class);}).to.throw('virtual method is not implemented');
   });
   it('derived class that implements each virtual methods (NON static), doesnt throw error', () => {
     const user_class =  class{constructor(arg){this.constructor_classe_base = arg;}};
@@ -107,12 +107,33 @@ describe('Virtual usage', () => {
       constructor(arg){super(arg); this.prova_che_constructor_chiamato = arg;}
       notDefinedVirtualMethod(){/* body */}
     };
+    expect(()=>{callConstructorForActivateCheck(derived_user_class);}).to.not.throw();
+  });
+  it('derived class that doesnt implements any virtual methods (STATIC), throws error', () => {
+    const user_class =  class{constructor(arg){this.constructor_classe_base = arg;}};
+    const class_with_virtual = virtual(t.enabling_flag)(user_class, {name: 'notDefinedStaticVirtualMethod', static: true});
+    makeSureThatBaseClassThrowsErrorWithStaticMethod(class_with_virtual, 'virtual method is not implemented');
+    
+    const derived_user_class = class extends class_with_virtual{
+      constructor(arg){super(arg); this.prova_che_constructor_chiamato = arg;}
+    };
+
+    expect(()=>{callMethodForActivateCheck(derived_user_class);}).to.throw('virtual method is not implemented');
+  });
+  it('derived class that implements each virtual methods (STATIC), doesnt throw error', () => {
+    const user_class =  class{constructor(arg){this.constructor_classe_base = arg;}};
+    const class_with_virtual = virtual(t.enabling_flag)(user_class, {name: 'notDefinedStaticVirtualMethod', static: true});
+    makeSureThatBaseClassThrowsErrorWithStaticMethod(class_with_virtual, 'virtual method is not implemented');
+    const derived_user_class = class extends class_with_virtual{
+      constructor(arg){super(arg); this.prova_che_constructor_chiamato = arg;}
+      static notDefinedStaticVirtualMethod(){/* body */}
+    };
     expect(()=>{new derived_user_class('value');}).to.not.throw();
   });
-  it.skip('derived class that doesnt implements any virtual methods (STATIC), throws error', () => {
+  it.skip('the virtual method missed in derived class is found also if user doesnt get static method but make constructor functionality', () => {
     
   });
-  it.skip('derived class that implements each virtual methods (STATIC), doesnt throw error', () => {
+  it.skip('the virtual static method missed in derived instance class is found also if user doesnt construct instane but make get functionality', () => {
     
   });
   it.skip('derived of class with virtual derived from base class with or without virtual', () => {
@@ -122,5 +143,7 @@ describe('Virtual usage', () => {
 
 function makeSureThatBaseClassThrowsError(user_class, error){
   expect(()=>{callConstructorForActivateCheck(user_class);}).to.throw(error);
-  
+}
+function makeSureThatBaseClassThrowsErrorWithStaticMethod(user_class, error){
+  expect(()=>{callMethodForActivateCheck(user_class);}).to.throw(error);
 }
